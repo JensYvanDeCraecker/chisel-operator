@@ -54,6 +54,7 @@ use crate::{
     },
 };
 use crate::{deployment::create_owned_deployment, error::ReconcileError};
+use std::env;
 
 pub const EXIT_NODE_FINALIZER: &str = "exitnode.chisel-operator.io/finalizer";
 pub const SVCS_FINALIZER: &str = "service.chisel-operator.io/finalizer";
@@ -169,6 +170,8 @@ const OPERATOR_CLASS: &str = "chisel-operator.io/chisel-operator-class";
 const OPERATOR_MANAGER: &str = "chisel-operator";
 
 const BACKOFF_TIME_SECS: u64 = 5;
+
+const REQUIRE_OPERATOR_CLASS: &str = "REQUIRE_OPERATOR_CLASS";
 
 async fn find_free_exit_nodes(ctx: Arc<Context>) -> Result<Vec<ExitNode>, ReconcileError> {
     let svc_api: Api<Service> = Api::all(ctx.client.clone());
@@ -394,6 +397,11 @@ async fn exit_node_for_service(
 async fn reconcile_svcs(obj: Arc<Service>, ctx: Arc<Context>) -> Result<Action, ReconcileError> {
     // Return if service is not LoadBalancer or if the loadBalancerClass is not blank or set to $OPERATOR_CLASS
 
+    let limit_load_balancer_class = env::var(REQUIRE_OPERATOR_CLASS)
+        .unwrap_or_else(|_| "false".to_string())
+        .parse::<bool>()
+        .unwrap_or(false);
+
     // todo: is there anything different need to be done for OpenShift? We use vanilla k8s and k3s/rke2 so we don't know
     if obj
         .spec
@@ -404,7 +412,7 @@ async fn reconcile_svcs(obj: Arc<Service>, ctx: Arc<Context>) -> Result<Action, 
             .spec
             .as_ref()
             .filter(|spec| {
-                spec.load_balancer_class.is_none()
+                (spec.load_balancer_class.is_none() && !limit_load_balancer_class)
                     || spec.load_balancer_class == Some(OPERATOR_CLASS.to_string())
             })
             .is_none()

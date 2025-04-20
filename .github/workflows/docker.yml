@@ -20,7 +20,7 @@ jobs:
     uses: JensYvanDeCraecker/chisel-operator-actions/.github/workflows/docker.yml@main
     with:
       publish: ${{ github.event_name != 'pull_request' }}
-      platform: self-hosted
+      platform: ubuntu-latest
     permissions:
       contents: read
       packages: write

@@ -1,7 +1,5 @@
 name: Docker
 on:
-  schedule:
-    - cron: "15 14 * * *"
   push:
     paths:
       - "Dockerfile"

@@ -1,5 +1,4 @@
 name: Docker
-
 on:
   schedule:
     - cron: "15 14 * * *"
@@ -20,6 +19,7 @@ on:
 
 jobs:
   docker:
+    runs-on: self-hosted
     uses: FyraLabs/actions/.github/workflows/docker.yml@main
     with:
       publish: ${{ github.event_name != 'pull_request' }}

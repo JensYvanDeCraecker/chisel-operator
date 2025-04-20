@@ -10,19 +10,20 @@ on:
       - "Cargo.toml"
       - ".dockerignore"
       - ".github/workflows/docker.yml"
-    branches: ["main", "stable"]
+    branches: [ "main", "stable" ]
     # Publish semver tags as releases.
-    tags: ["v*.*.*"]
+    tags: [ "v*.*.*" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
   docker:
     runs-on: self-hosted
-    uses: FyraLabs/actions/.github/workflows/docker.yml@main
-    with:
-      publish: ${{ github.event_name != 'pull_request' }}
+    steps:
+      - uses: FyraLabs/actions/.github/workflows/docker.yml@main
+        with:
+          publish: ${{ github.event_name != 'pull_request' }}
     permissions:
       contents: read
       packages: write
